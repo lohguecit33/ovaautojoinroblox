@@ -41,14 +41,14 @@ def is_blox_fruits_running():
 # Fungsi untuk menjalankan Roblox
 def run_roblox():
     subprocess.run(['adb', 'shell', 'am', 'start', '-n', 'com.roblox.client/.startup.ActivitySplash'])
-    time.sleep(7)  # Menunggu beberapa detik agar Roblox dapat diluncurkan
+    time.sleep(9)  # Menunggu beberapa detik agar Roblox dapat diluncurkan
 
 # Fungsi untuk auto join dan memulai game Blox Fruits langsung tanpa koordinat
 def auto_join_blox_fruits(game_id):
     print(colored("Membuka game Blox Fruits...", 'green'))
     subprocess.run(['adb', 'shell', 'am', 'start', '-n', 'com.roblox.client/.ActivityProtocolLaunch', 
                     '-d', f'https://www.roblox.com/games/{game_id}'])
-    time.sleep(12)  # Menunggu beberapa detik agar game dimulai
+    time.sleep(8)  # Menunggu beberapa detik agar game dimulai
     ensure_game_started()
 
 # Fungsi untuk menekan tombol Start di game Blox Fruits (menggunakan ADB) beberapa kali
