@@ -33,10 +33,11 @@ def is_roblox_running():
     result = subprocess.run(['adb', 'shell', 'pidof', 'com.roblox.client'], stdout=subprocess.PIPE)
     return result.stdout.strip() != b''
 
-# Fungsi untuk memeriksa apakah game Blox Fruits sudah dimulai
-def is_blox_fruits_running():
-    result = subprocess.run(['adb', 'shell', 'pidof', 'com.roblox.client'], stdout=subprocess.PIPE)
-    return result.stdout.strip() != b''
+# Fungsi untuk menutup Roblox
+def close_roblox():
+    print(colored("Menutup aplikasi Roblox...", 'yellow'))
+    subprocess.run(['adb', 'shell', 'am', 'force-stop', 'com.roblox.client'])
+    time.sleep(5)  # Beri waktu agar proses benar-benar dihentikan
 
 # Fungsi untuk menjalankan Roblox
 def run_roblox():
@@ -69,42 +70,16 @@ def press_start_button_multiple_times():
         subprocess.run(['adb', 'shell', 'input', 'tap', str(x2), str(y2)])
         time.sleep(1)  # Jeda 1 detik
 
-
 # Fungsi untuk memastikan game Blox Fruits sudah mulai dan siap dimainkan
 def ensure_game_started():
     print(colored("Memastikan game Blox Fruits sudah dimulai...", 'green'))
     for _ in range(5):  # Melakukan pengecekan 5 kali
-        if is_blox_fruits_running():
+        if is_roblox_running():
             press_start_button_multiple_times()  # Menekan tombol Start 5 kali
             return True
         time.sleep(5)
     print(colored("Game Blox Fruits tidak dimulai. Coba lagi.", 'red'))
     return False
-
-# Fungsi untuk menampilkan tabel status Roblox dan Blox Fruits (disatukan)
-def display_process_table(user_id, game_id):
-    roblox_status = "Berjalan" if is_roblox_running() else "Tidak Berjalan"
-    blox_fruits_status = "Dalam Game Blox Fruits" if is_blox_fruits_running() else "Tidak Di Dalam Game"
-
-    table = [
-        ["Proses Roblox (Blox Fruits)", f"{roblox_status}, {blox_fruits_status}"],
-        ["User ID", user_id if user_id else "Tidak Ditemukan"],
-        ["Game ID", game_id if game_id else "Tidak Ditemukan"]
-    ]
-
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print(tabulate(table, headers=["Proses", "Status"], tablefmt="grid"))
-
-# Fungsi untuk mengecek dan menyiapkan User ID dan Game ID
-def set_user_and_game_id():
-    global user_id, game_id
-    user_id = input("Masukkan User ID (username Roblox): ")
-    print(f"User ID telah diatur ke: {user_id}")
-
-    game_id = input("Masukkan Game ID untuk Blox Fruits: ")
-    print(f"Game ID telah diatur ke: {game_id}")
-
-    save_config(user_id, game_id)
 
 # Fungsi untuk memastikan Roblox tetap berjalan dan restart sesuai interval waktu yang ditentukan
 def ensure_roblox_running_with_interval(interval_minutes):
@@ -114,22 +89,12 @@ def ensure_roblox_running_with_interval(interval_minutes):
     while True:
         elapsed_time = time.time() - start_time
 
-        # Cek apakah sudah waktunya untuk restart
-        if elapsed_time >= interval_seconds:
-            print(colored(f"Interval {interval_minutes} menit telah berlalu. Memulai ulang Roblox...", 'yellow'))
+        if elapsed_time >= interval_seconds or not is_roblox_running():
+            print(colored(f"Memulai ulang Roblox...", 'yellow'))
+            close_roblox()
             run_roblox()
             auto_join_blox_fruits(game_id)
             ensure_game_started()
-            press_start_button_multiple_times()  # Tekan Start beberapa kali setelah restart
-            start_time = time.time()  # Reset waktu mulai
-
-        # Cek apakah Roblox keluar atau force close
-        if not is_roblox_running():
-            print(colored("Roblox terdeteksi keluar atau force close. Memulai ulang...", 'red'))
-            run_roblox()
-            auto_join_blox_fruits(game_id)
-            ensure_game_started()
-            press_start_button_multiple_times()  # Tekan Start beberapa kali setelah restart
             start_time = time.time()  # Reset waktu mulai
 
         time.sleep(10)  # Cek setiap 10 detik
@@ -143,49 +108,31 @@ def menu():
     if user_id and game_id:
         print(colored(f"User ID: {user_id}, Game ID: {game_id} telah dimuat dari konfigurasi.", 'green'))
     else:
-        print(colored("User ID dan Game ID belum diset. Silakan pilih 2 untuk menyetelnya.", 'yellow'))
+        print(colored("User ID dan Game ID belum diset. Silakan set terlebih dahulu.", 'yellow'))
 
     while True:
-        display_process_table(user_id, game_id)
-
-        print(colored("\nMenu Utama:", 'blue'))
-        print("1. Set Interval Restart Roblox dan Auto Join ke Blox Fruits")
+        print("\nMenu:")
+        print("1. Atur interval restart dan jalankan ulang Roblox")
         print("2. Set User ID dan Game ID")
-        print("3. Exit")
+        print("3. Keluar")
 
         choice = input("Pilih nomor (1/2/3): ")
 
         if choice == '1':
-            # Menambahkan menu untuk memilih waktu restart sebelum memulai Roblox
-            while True:
-                try:
-                    interval_minutes = int(input("Masukkan waktu restart Roblox dalam menit (misalnya 5): "))
-                    print(colored(f"Roblox akan restart setiap {interval_minutes} menit.", 'green'))
-                    break
-                except ValueError:
-                    print(colored("Input tidak valid. Harap masukkan angka.", 'red'))
-
             if user_id is None or game_id is None:
-                print(colored("User ID atau Game ID belum diset. Silakan pilih 2 untuk menyetelnya.", 'red'))
-            else:
-                print(colored("Memulai Roblox dan Blox Fruits...", 'green'))
-                run_roblox()
-                auto_join_blox_fruits(game_id)
-                ensure_game_started()
-                press_start_button_multiple_times()  # Tekan Start beberapa kali setelah game dimulai
-
-                # Menjalankan fungsi untuk memastikan Roblox berjalan dan restart sesuai interval
-                ensure_roblox_running_with_interval(interval_minutes)
-
+                print(colored("User ID atau Game ID belum diset. Silakan set terlebih dahulu.", 'red'))
+                continue
+            interval_minutes = int(input("Masukkan interval waktu (dalam menit): "))
+            ensure_roblox_running_with_interval(interval_minutes)
         elif choice == '2':
-            set_user_and_game_id()
-
+            user_id = input("Masukkan User ID: ")
+            game_id = input("Masukkan Game ID: ")
+            save_config(user_id, game_id)
         elif choice == '3':
-            print(colored("Keluar...", 'red'))
-            exit(0)
-
+            print("Keluar dari program...")
+            break
         else:
-            print(colored("Pilihan tidak valid, kembali ke menu...", 'yellow'))
+            print("Pilihan tidak valid!")
 
-# Main execution
+# Eksekusi utama
 menu()
