@@ -81,28 +81,22 @@ def run_multiple_blox_fruits_parallel(game_id, packages):
 
 # Fungsi untuk mendeteksi paket Roblox yang terinstal tanpa menggunakan adb
 def get_installed_packages():
-    # Direktori tempat aplikasi terinstal (ini contoh untuk Android atau emulator)
-    # Anda bisa menyesuaikan dengan path yang sesuai dengan perangkat/lingkungan Anda
-    potential_package_paths = [
-        "/data/app/",  # Biasanya tempat aplikasi terinstal di Android
-        "/system/app/",  # Lokasi aplikasi sistem di Android
-        "/system/priv-app/"  # Aplikasi dengan hak akses lebih tinggi
-    ]
-
+    # Direktori tempat aplikasi terinstal (untuk Android atau emulator)
+    # Menggunakan /data/data untuk mencari paket dengan awalan com.roblox
+    package_dir = "/data/data/"
+    
     installed_packages = []
     
-    # Mencari di direktori aplikasi
-    for path in potential_package_paths:
-        if os.path.exists(path):
-            try:
-                # Menelusuri folder aplikasi di direktori
-                for folder in os.listdir(path):
-                    if 'roblox' in folder.lower():  # Menyaring folder dengan nama Roblox
-                        installed_packages.append(folder)
-            except PermissionError:
-                print(f"Permission denied saat mengakses {path}.")
-            except FileNotFoundError:
-                print(f"Direktori {path} tidak ditemukan.")
+    # Memeriksa direktori untuk paket Roblox yang dimulai dengan com.roblox
+    if os.path.exists(package_dir):
+        try:
+            for folder in os.listdir(package_dir):
+                if folder.startswith("com.roblox"):  # Menyaring folder dengan awalan com.roblox
+                    installed_packages.append(folder)
+        except PermissionError:
+            print(f"Permission denied saat mengakses {package_dir}.")
+        except FileNotFoundError:
+            print(f"Direktori {package_dir} tidak ditemukan.")
     
     if installed_packages:
         print("Paket Roblox yang terdeteksi:")
