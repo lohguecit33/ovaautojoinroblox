@@ -93,6 +93,7 @@ def get_installed_packages():
     for package_dir in package_dirs:
         if os.path.exists(package_dir):
             try:
+                # Perbaikan di sini: looping untuk setiap direktori package_dir
                 for folder in os.listdir(package_dir):
                     if folder.startswith("com.roblox"):  # Menyaring folder dengan awalan com.roblox
                         installed_packages.append(folder)
