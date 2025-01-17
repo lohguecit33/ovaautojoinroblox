@@ -4,7 +4,7 @@ from colorama import init
 from termcolor import colored
 import threading
 import time
-import subprocess
+import subprocess  # Pastikan subprocess diimpor
 
 # Inisialisasi Colorama untuk pewarnaan teks
 init(autoreset=True)
