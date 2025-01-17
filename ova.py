@@ -81,35 +81,23 @@ def run_multiple_blox_fruits_parallel(game_id, packages):
 
 # Fungsi untuk mendeteksi paket Roblox yang terinstal tanpa menggunakan adb
 def get_installed_packages():
-    # Direktori tempat aplikasi terinstal pada perangkat tanpa akses root
-    package_dirs = [
-        "/data/app/",  # Aplikasi pengguna
-        "/system/app/",  # Aplikasi sistem
-        "/system/priv-app/"  # Aplikasi sistem dengan hak akses lebih tinggi
-    ]
-    installed_packages = []
-    
-    # Memeriksa direktori untuk paket Roblox yang dimulai dengan com.roblox
-    for package_dir in package_dirs:
-        if os.path.exists(package_dir):
-            try:
-                # Perbaikan di sini: looping untuk setiap direktori package_dir
-                for folder in os.listdir(package_dir):
-                    if folder.startswith("com.roblox"):  # Menyaring folder dengan awalan com.roblox
-                        installed_packages.append(folder)
-            except PermissionError:
-                print(f"Permission denied saat mengakses {package_dir}.")
-            except FileNotFoundError:
-                print(f"Direktori {package_dir} tidak ditemukan.")
-    
-    if installed_packages:
-        print("Paket Roblox yang terdeteksi:")
-        for pkg in installed_packages:
-            print(f" - {pkg}")
-    else:
-        print("Tidak ada paket Roblox yang terdeteksi.")
-    
-    return installed_packages
+    try:
+        # Menjalankan perintah adb untuk mendapatkan daftar paket yang terinstal
+        result = subprocess.run(['adb', 'shell', 'pm', 'list', 'packages'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode != 0:
+            print(f"Error saat mencoba mendapatkan daftar paket: {result.stderr}")
+            return []
+
+        # Memproses hasil yang didapat dan menyaring paket yang terinstal dengan awalan "com.roblox"
+        installed_packages = []
+        for line in result.stdout.splitlines():
+            if "com.roblox" in line:  # Menyaring paket dengan awalan com.roblox
+                installed_packages.append(line.replace("package:", "").strip())
+
+        return installed_packages
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
 
 # Fungsi utama untuk menjalankan menu
 def menu():
