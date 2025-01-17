@@ -1,4 +1,5 @@
 import os
+import glob
 from tabulate import tabulate
 from colorama import init
 from termcolor import colored
@@ -82,23 +83,36 @@ def run_multiple_blox_fruits_parallel(game_id, packages):
 
 # Fungsi untuk mendeteksi paket Roblox yang terinstal menggunakan ADB
 def get_installed_packages():
-    try:
-        # Menjalankan perintah adb untuk mendapatkan daftar paket yang terinstal
-        result = subprocess.run(['adb', 'shell', 'pm', 'list', 'packages'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if result.returncode != 0:
-            print(f"Error saat mencoba mendapatkan daftar paket: {result.stderr}")
-            return []
+    # Direktori yang umum untuk aplikasi di Android (tanpa root)
+    package_dirs = [
+        "/data/app/",
+        "/system/app/",
+        "/system/priv-app/"
+    ]
+    installed_packages = []
+    
+    # Menelusuri setiap direktori untuk mencari paket Roblox
+    for package_dir in package_dirs:
+        if os.path.exists(package_dir):
+            try:
+                # Gunakan glob untuk mencari folder yang dimulai dengan 'com.roblox'
+                installed_packages += glob.glob(os.path.join(package_dir, "com.roblox*"))
+            except PermissionError:
+                print(f"Permission denied saat mengakses {package_dir}.")
+            except FileNotFoundError:
+                print(f"Direktori {package_dir} tidak ditemukan.")
+    
+    if installed_packages:
+        print("Paket Roblox yang terdeteksi:")
+        for pkg in installed_packages:
+            print(f" - {pkg}")
+    else:
+        print("Tidak ada paket Roblox yang terdeteksi.")
+    
+    return installed_packages
 
-        # Memproses hasil yang didapat dan menyaring paket yang terinstal dengan awalan "com.roblox"
-        installed_packages = []
-        for line in result.stdout.splitlines():
-            if "com.roblox" in line:  # Menyaring paket dengan awalan com.roblox
-                installed_packages.append(line.replace("package:", "").strip())
-
-        return installed_packages
-    except Exception as e:
-        print(f"Error: {e}")
-        return []
+# Panggil fungsi untuk melihat hasilnya
+get_installed_packages()
 
 # Fungsi utama untuk menjalankan menu
 def menu():
