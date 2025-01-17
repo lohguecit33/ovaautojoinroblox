@@ -3,6 +3,7 @@ import time
 import os
 from tabulate import tabulate
 from colorama import init
+from termcolor import colored
 import threading  # Import threading untuk menjalankan proses paralel
 
 # Inisialisasi Colorama untuk pewarnaan teks
