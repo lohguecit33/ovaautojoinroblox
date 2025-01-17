@@ -80,7 +80,7 @@ def run_multiple_blox_fruits_parallel(game_id, packages):
     for thread in threads:
         thread.join()
 
-# Fungsi untuk mendeteksi paket Roblox yang terinstal tanpa menggunakan adb
+# Fungsi untuk mendeteksi paket Roblox yang terinstal menggunakan ADB
 def get_installed_packages():
     try:
         # Menjalankan perintah adb untuk mendapatkan daftar paket yang terinstal
@@ -134,6 +134,12 @@ def menu():
         elif choice == '3':
             # Auto setup paket
             packages = get_installed_packages()
+            if packages:
+                print(colored("Paket Roblox yang terdeteksi:", 'green'))
+                for pkg in packages:
+                    print(f" - {pkg}")
+            else:
+                print(colored("Tidak ada paket Roblox yang terdeteksi.", 'red'))
             save_config(user_id, game_id, packages)
         elif choice == '4':
             print("Keluar dari program...")
