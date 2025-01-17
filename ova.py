@@ -81,9 +81,11 @@ def run_multiple_blox_fruits_parallel(game_id, packages):
 
 # Fungsi untuk mendeteksi paket Roblox yang terinstal tanpa menggunakan adb
 def get_installed_packages():
-    # Direktori tempat aplikasi terinstal (untuk Android atau emulator)
-    # Menggunakan /data/data untuk mencari paket dengan awalan com.roblox
-    package_dir = "/data/data/"
+    # Direktori tempat aplikasi terinstal pada perangkat tanpa akses root
+    package_dirs = [
+        "/data/app/",  # Aplikasi pengguna
+        "/system/app/",  # Aplikasi sistem
+        "/system/priv-app/"  # Aplikasi sistem dengan hak akses lebih tinggi
     
     installed_packages = []
     
