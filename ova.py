@@ -96,7 +96,7 @@ def get_installed_packages():
         if os.path.exists(package_dir):
             try:
                 # Gunakan glob untuk mencari folder yang dimulai dengan 'com'
-                installed_packages += glob.glob(os.path.join(package_dir, "roblox*"))
+                installed_packages += glob.glob(os.path.join(package_dir, "com*"))
             except PermissionError:
                 print(f"Permission denied saat mengakses {package_dir}.")
             except FileNotFoundError:
